@@ -48,6 +48,7 @@ Elk is a large open-source project made up of seeral repositories. Elk is very m
 Here's a list of the main packages:
 
 * [exchange-contracts](https://github.com/elkfinance/exchange-contracts.git) - The core Elk Exchange contracts.
+* [sdk](https://github.com/elkfinance/sdk.git) - The Elk Finance SDK.
 * [tokenlists](https://github.com/elkfinance/tokenlists.git) - Lists of supported tokens.
 * [elkfinance.github.io](https://github.com/elkfinance/elkfinance.github.io.git) - The Elk.Finance website.
 * [liquidity-scores](https://github.com/elkfinance/liquidity-scores.git) - Liquidity score computations.
