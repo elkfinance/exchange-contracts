@@ -17,6 +17,12 @@ ElkRouter address: `0x9E4AAbd2B3E60Ee1322E94307d0776F2c8e6CFbb`
 
 ### MATIC
 
+ElkFactory address: `0xE3BD06c7ac7E1CeB17BdD2E5BA83E40D1515AF2a`
+
+ElkRouter address: `0xf38a7A7Ac2D745E2204c13F824c00139DF831FFf`
+
+### FTM
+
 Not yet supported.
 
 ### BSC
