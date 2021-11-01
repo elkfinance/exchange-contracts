@@ -11,8 +11,6 @@ Elk Finance uses three main contract templates:
 
 Please see https://docs.elk.finance/addresses for an up-to-date list of addresses of deployed contracts on supported chains.
 
-Not yet supported.
-
 ## Compiling and Running
 
 ### Using Hardhat
