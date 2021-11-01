@@ -22,7 +22,7 @@ library ElkLibrary {
                 hex'ff',
                 factory,
                 keccak256(abi.encodePacked(token0, token1)),
-                hex'33c4831a098654d3d20a78641a198ee6ffc1ceed49f2196b75bb244891c260e3' // init code hash
+                hex'84845e7ccb283dec564acfcd3d9287a491dec6d675705545a2ab8be22ad78f31' // init code hash
             ))));
     }
 

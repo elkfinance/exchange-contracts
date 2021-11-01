@@ -7,26 +7,26 @@ import './interfaces/IElkRouter.sol';
 import './libraries/ElkLibrary.sol';
 import './libraries/SafeMath.sol';
 import './interfaces/IERC20.sol';
-import './interfaces/IWAVAX.sol';
+import './interfaces/IWETH.sol';
 
 contract ElkRouter is IElkRouter {
     using SafeMath for uint;
 
     address public immutable override factory;
-    address public immutable override WAVAX;
+    address public immutable override WETH;
 
     modifier ensure(uint deadline) {
         require(deadline >= block.timestamp, 'ElkRouter: EXPIRED');
         _;
     }
 
-    constructor(address _factory, address _WAVAX) public {
+    constructor(address _factory, address _WETH) public {
         factory = _factory;
-        WAVAX = _WAVAX;
+        WETH = _WETH;
     }
 
     receive() external payable {
-        assert(msg.sender == WAVAX); // only accept AVAX via fallback from the WAVAX contract
+        assert(msg.sender == WETH); // only accept ETH via fallback from the WETH contract
     }
 
     // **** ADD LIQUIDITY ****
@@ -74,29 +74,29 @@ contract ElkRouter is IElkRouter {
         TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
         liquidity = IElkPair(pair).mint(to);
     }
-    function addLiquidityAVAX(
+    function addLiquidityETH(
         address token,
         uint amountTokenDesired,
         uint amountTokenMin,
-        uint amountAVAXMin,
+        uint amountETHMin,
         address to,
         uint deadline
-    ) external virtual override payable ensure(deadline) returns (uint amountToken, uint amountAVAX, uint liquidity) {
-        (amountToken, amountAVAX) = _addLiquidity(
+    ) external virtual override payable ensure(deadline) returns (uint amountToken, uint amountETH, uint liquidity) {
+        (amountToken, amountETH) = _addLiquidity(
             token,
-            WAVAX,
+            WETH,
             amountTokenDesired,
             msg.value,
             amountTokenMin,
-            amountAVAXMin
+            amountETHMin
         );
-        address pair = ElkLibrary.pairFor(factory, token, WAVAX);
+        address pair = ElkLibrary.pairFor(factory, token, WETH);
         TransferHelper.safeTransferFrom(token, msg.sender, pair, amountToken);
-        IWAVAX(WAVAX).deposit{value: amountAVAX}();
-        assert(IWAVAX(WAVAX).transfer(pair, amountAVAX));
+        IWETH(WETH).deposit{value: amountETH}();
+        assert(IWETH(WETH).transfer(pair, amountETH));
         liquidity = IElkPair(pair).mint(to);
-        // refund dust AVAX, if any
-        if (msg.value > amountAVAX) TransferHelper.safeTransferAVAX(msg.sender, msg.value - amountAVAX);
+        // refund dust ETH, if any
+        if (msg.value > amountETH) TransferHelper.safeTransferETH(msg.sender, msg.value - amountETH);
     }
 
     // **** REMOVE LIQUIDITY ****
@@ -117,26 +117,26 @@ contract ElkRouter is IElkRouter {
         require(amountA >= amountAMin, 'ElkRouter: INSUFFICIENT_A_AMOUNT');
         require(amountB >= amountBMin, 'ElkRouter: INSUFFICIENT_B_AMOUNT');
     }
-    function removeLiquidityAVAX(
+    function removeLiquidityETH(
         address token,
         uint liquidity,
         uint amountTokenMin,
-        uint amountAVAXMin,
+        uint amountETHMin,
         address to,
         uint deadline
-    ) public virtual override ensure(deadline) returns (uint amountToken, uint amountAVAX) {
-        (amountToken, amountAVAX) = removeLiquidity(
+    ) public virtual override ensure(deadline) returns (uint amountToken, uint amountETH) {
+        (amountToken, amountETH) = removeLiquidity(
             token,
-            WAVAX,
+            WETH,
             liquidity,
             amountTokenMin,
-            amountAVAXMin,
+            amountETHMin,
             address(this),
             deadline
         );
         TransferHelper.safeTransfer(token, to, amountToken);
-        IWAVAX(WAVAX).withdraw(amountAVAX);
-        TransferHelper.safeTransferAVAX(to, amountAVAX);
+        IWETH(WETH).withdraw(amountETH);
+        TransferHelper.safeTransferETH(to, amountETH);
     }
     function removeLiquidityWithPermit(
         address tokenA,
@@ -153,57 +153,57 @@ contract ElkRouter is IElkRouter {
         IElkPair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
         (amountA, amountB) = removeLiquidity(tokenA, tokenB, liquidity, amountAMin, amountBMin, to, deadline);
     }
-    function removeLiquidityAVAXWithPermit(
+    function removeLiquidityETHWithPermit(
         address token,
         uint liquidity,
         uint amountTokenMin,
-        uint amountAVAXMin,
+        uint amountETHMin,
         address to,
         uint deadline,
         bool approveMax, uint8 v, bytes32 r, bytes32 s
-    ) external virtual override returns (uint amountToken, uint amountAVAX) {
-        address pair = ElkLibrary.pairFor(factory, token, WAVAX);
+    ) external virtual override returns (uint amountToken, uint amountETH) {
+        address pair = ElkLibrary.pairFor(factory, token, WETH);
         uint value = approveMax ? uint(-1) : liquidity;
         IElkPair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
-        (amountToken, amountAVAX) = removeLiquidityAVAX(token, liquidity, amountTokenMin, amountAVAXMin, to, deadline);
+        (amountToken, amountETH) = removeLiquidityETH(token, liquidity, amountTokenMin, amountETHMin, to, deadline);
     }
 
     // **** REMOVE LIQUIDITY (supporting fee-on-transfer tokens) ****
-    function removeLiquidityAVAXSupportingFeeOnTransferTokens(
+    function removeLiquidityETHSupportingFeeOnTransferTokens(
         address token,
         uint liquidity,
         uint amountTokenMin,
-        uint amountAVAXMin,
+        uint amountETHMin,
         address to,
         uint deadline
-    ) public virtual override ensure(deadline) returns (uint amountAVAX) {
-        (, amountAVAX) = removeLiquidity(
+    ) public virtual override ensure(deadline) returns (uint amountETH) {
+        (, amountETH) = removeLiquidity(
             token,
-            WAVAX,
+            WETH,
             liquidity,
             amountTokenMin,
-            amountAVAXMin,
+            amountETHMin,
             address(this),
             deadline
         );
         TransferHelper.safeTransfer(token, to, IERC20(token).balanceOf(address(this)));
-        IWAVAX(WAVAX).withdraw(amountAVAX);
-        TransferHelper.safeTransferAVAX(to, amountAVAX);
+        IWETH(WETH).withdraw(amountETH);
+        TransferHelper.safeTransferETH(to, amountETH);
     }
-    function removeLiquidityAVAXWithPermitSupportingFeeOnTransferTokens(
+    function removeLiquidityETHWithPermitSupportingFeeOnTransferTokens(
         address token,
         uint liquidity,
         uint amountTokenMin,
-        uint amountAVAXMin,
+        uint amountETHMin,
         address to,
         uint deadline,
         bool approveMax, uint8 v, bytes32 r, bytes32 s
-    ) external virtual override returns (uint amountAVAX) {
-        address pair = ElkLibrary.pairFor(factory, token, WAVAX);
+    ) external virtual override returns (uint amountETH) {
+        address pair = ElkLibrary.pairFor(factory, token, WETH);
         uint value = approveMax ? uint(-1) : liquidity;
         IElkPair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
-        amountAVAX = removeLiquidityAVAXSupportingFeeOnTransferTokens(
-            token, liquidity, amountTokenMin, amountAVAXMin, to, deadline
+        amountETH = removeLiquidityETHSupportingFeeOnTransferTokens(
+            token, liquidity, amountTokenMin, amountETHMin, to, deadline
         );
     }
 
@@ -249,7 +249,7 @@ contract ElkRouter is IElkRouter {
         );
         _swap(amounts, path, to);
     }
-    function swapExactAVAXForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
+    function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
         external
         virtual
         override
@@ -257,48 +257,48 @@ contract ElkRouter is IElkRouter {
         ensure(deadline)
         returns (uint[] memory amounts)
     {
-        require(path[0] == WAVAX, 'ElkRouter: INVALID_PATH');
+        require(path[0] == WETH, 'ElkRouter: INVALID_PATH');
         amounts = ElkLibrary.getAmountsOut(factory, msg.value, path);
         require(amounts[amounts.length - 1] >= amountOutMin, 'ElkRouter: INSUFFICIENT_OUTPUT_AMOUNT');
-        IWAVAX(WAVAX).deposit{value: amounts[0]}();
-        assert(IWAVAX(WAVAX).transfer(ElkLibrary.pairFor(factory, path[0], path[1]), amounts[0]));
+        IWETH(WETH).deposit{value: amounts[0]}();
+        assert(IWETH(WETH).transfer(ElkLibrary.pairFor(factory, path[0], path[1]), amounts[0]));
         _swap(amounts, path, to);
     }
-    function swapTokensForExactAVAX(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
+    function swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
         external
         virtual
         override
         ensure(deadline)
         returns (uint[] memory amounts)
     {
-        require(path[path.length - 1] == WAVAX, 'ElkRouter: INVALID_PATH');
+        require(path[path.length - 1] == WETH, 'ElkRouter: INVALID_PATH');
         amounts = ElkLibrary.getAmountsIn(factory, amountOut, path);
         require(amounts[0] <= amountInMax, 'ElkRouter: EXCESSIVE_INPUT_AMOUNT');
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, ElkLibrary.pairFor(factory, path[0], path[1]), amounts[0]
         );
         _swap(amounts, path, address(this));
-        IWAVAX(WAVAX).withdraw(amounts[amounts.length - 1]);
-        TransferHelper.safeTransferAVAX(to, amounts[amounts.length - 1]);
+        IWETH(WETH).withdraw(amounts[amounts.length - 1]);
+        TransferHelper.safeTransferETH(to, amounts[amounts.length - 1]);
     }
-    function swapExactTokensForAVAX(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
         external
         virtual
         override
         ensure(deadline)
         returns (uint[] memory amounts)
     {
-        require(path[path.length - 1] == WAVAX, 'ElkRouter: INVALID_PATH');
+        require(path[path.length - 1] == WETH, 'ElkRouter: INVALID_PATH');
         amounts = ElkLibrary.getAmountsOut(factory, amountIn, path);
         require(amounts[amounts.length - 1] >= amountOutMin, 'ElkRouter: INSUFFICIENT_OUTPUT_AMOUNT');
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, ElkLibrary.pairFor(factory, path[0], path[1]), amounts[0]
         );
         _swap(amounts, path, address(this));
-        IWAVAX(WAVAX).withdraw(amounts[amounts.length - 1]);
-        TransferHelper.safeTransferAVAX(to, amounts[amounts.length - 1]);
+        IWETH(WETH).withdraw(amounts[amounts.length - 1]);
+        TransferHelper.safeTransferETH(to, amounts[amounts.length - 1]);
     }
-    function swapAVAXForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
+    function swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
         external
         virtual
         override
@@ -306,14 +306,14 @@ contract ElkRouter is IElkRouter {
         ensure(deadline)
         returns (uint[] memory amounts)
     {
-        require(path[0] == WAVAX, 'ElkRouter: INVALID_PATH');
+        require(path[0] == WETH, 'ElkRouter: INVALID_PATH');
         amounts = ElkLibrary.getAmountsIn(factory, amountOut, path);
         require(amounts[0] <= msg.value, 'ElkRouter: EXCESSIVE_INPUT_AMOUNT');
-        IWAVAX(WAVAX).deposit{value: amounts[0]}();
-        assert(IWAVAX(WAVAX).transfer(ElkLibrary.pairFor(factory, path[0], path[1]), amounts[0]));
+        IWETH(WETH).deposit{value: amounts[0]}();
+        assert(IWETH(WETH).transfer(ElkLibrary.pairFor(factory, path[0], path[1]), amounts[0]));
         _swap(amounts, path, to);
-        // refund dust AVAX, if any
-        if (msg.value > amounts[0]) TransferHelper.safeTransferAVAX(msg.sender, msg.value - amounts[0]);
+        // refund dust ETH, if any
+        if (msg.value > amounts[0]) TransferHelper.safeTransferETH(msg.sender, msg.value - amounts[0]);
     }
 
     // **** SWAP (supporting fee-on-transfer tokens) ****
@@ -353,7 +353,7 @@ contract ElkRouter is IElkRouter {
             'ElkRouter: INSUFFICIENT_OUTPUT_AMOUNT'
         );
     }
-    function swapExactAVAXForTokensSupportingFeeOnTransferTokens(
+    function swapExactETHForTokensSupportingFeeOnTransferTokens(
         uint amountOutMin,
         address[] calldata path,
         address to,
@@ -365,10 +365,10 @@ contract ElkRouter is IElkRouter {
         payable
         ensure(deadline)
     {
-        require(path[0] == WAVAX, 'ElkRouter: INVALID_PATH');
+        require(path[0] == WETH, 'ElkRouter: INVALID_PATH');
         uint amountIn = msg.value;
-        IWAVAX(WAVAX).deposit{value: amountIn}();
-        assert(IWAVAX(WAVAX).transfer(ElkLibrary.pairFor(factory, path[0], path[1]), amountIn));
+        IWETH(WETH).deposit{value: amountIn}();
+        assert(IWETH(WETH).transfer(ElkLibrary.pairFor(factory, path[0], path[1]), amountIn));
         uint balanceBefore = IERC20(path[path.length - 1]).balanceOf(to);
         _swapSupportingFeeOnTransferTokens(path, to);
         require(
@@ -376,7 +376,7 @@ contract ElkRouter is IElkRouter {
             'ElkRouter: INSUFFICIENT_OUTPUT_AMOUNT'
         );
     }
-    function swapExactTokensForAVAXSupportingFeeOnTransferTokens(
+    function swapExactTokensForETHSupportingFeeOnTransferTokens(
         uint amountIn,
         uint amountOutMin,
         address[] calldata path,
@@ -388,15 +388,15 @@ contract ElkRouter is IElkRouter {
         override
         ensure(deadline)
     {
-        require(path[path.length - 1] == WAVAX, 'ElkRouter: INVALID_PATH');
+        require(path[path.length - 1] == WETH, 'ElkRouter: INVALID_PATH');
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, ElkLibrary.pairFor(factory, path[0], path[1]), amountIn
         );
         _swapSupportingFeeOnTransferTokens(path, address(this));
-        uint amountOut = IERC20(WAVAX).balanceOf(address(this));
+        uint amountOut = IERC20(WETH).balanceOf(address(this));
         require(amountOut >= amountOutMin, 'ElkRouter: INSUFFICIENT_OUTPUT_AMOUNT');
-        IWAVAX(WAVAX).withdraw(amountOut);
-        TransferHelper.safeTransferAVAX(to, amountOut);
+        IWETH(WETH).withdraw(amountOut);
+        TransferHelper.safeTransferETH(to, amountOut);
     }
 
     // **** LIBRARY FUNCTIONS ****

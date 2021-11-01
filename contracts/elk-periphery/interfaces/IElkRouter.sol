@@ -2,7 +2,7 @@ pragma solidity >=0.6.2;
 
 interface IElkRouter {
     function factory() external pure returns (address);
-    function WAVAX() external pure returns (address);
+    function WETH() external pure returns (address);
 
     function addLiquidity(
         address tokenA,
@@ -14,14 +14,14 @@ interface IElkRouter {
         address to,
         uint deadline
     ) external returns (uint amountA, uint amountB, uint liquidity);
-    function addLiquidityAVAX(
+    function addLiquidityETH(
         address token,
         uint amountTokenDesired,
         uint amountTokenMin,
-        uint amountAVAXMin,
+        uint amountETHMin,
         address to,
         uint deadline
-    ) external payable returns (uint amountToken, uint amountAVAX, uint liquidity);
+    ) external payable returns (uint amountToken, uint amountETH, uint liquidity);
     function removeLiquidity(
         address tokenA,
         address tokenB,
@@ -31,14 +31,14 @@ interface IElkRouter {
         address to,
         uint deadline
     ) external returns (uint amountA, uint amountB);
-    function removeLiquidityAVAX(
+    function removeLiquidityETH(
         address token,
         uint liquidity,
         uint amountTokenMin,
-        uint amountAVAXMin,
+        uint amountETHMin,
         address to,
         uint deadline
-    ) external returns (uint amountToken, uint amountAVAX);
+    ) external returns (uint amountToken, uint amountETH);
     function removeLiquidityWithPermit(
         address tokenA,
         address tokenB,
@@ -49,15 +49,15 @@ interface IElkRouter {
         uint deadline,
         bool approveMax, uint8 v, bytes32 r, bytes32 s
     ) external returns (uint amountA, uint amountB);
-    function removeLiquidityAVAXWithPermit(
+    function removeLiquidityETHWithPermit(
         address token,
         uint liquidity,
         uint amountTokenMin,
-        uint amountAVAXMin,
+        uint amountETHMin,
         address to,
         uint deadline,
         bool approveMax, uint8 v, bytes32 r, bytes32 s
-    ) external returns (uint amountToken, uint amountAVAX);
+    ) external returns (uint amountToken, uint amountETH);
     function swapExactTokensForTokens(
         uint amountIn,
         uint amountOutMin,
@@ -72,17 +72,17 @@ interface IElkRouter {
         address to,
         uint deadline
     ) external returns (uint[] memory amounts);
-    function swapExactAVAXForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
+    function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
         external
         payable
         returns (uint[] memory amounts);
-    function swapTokensForExactAVAX(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
+    function swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
         external
         returns (uint[] memory amounts);
-    function swapExactTokensForAVAX(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
         external
         returns (uint[] memory amounts);
-    function swapAVAXForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
+    function swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
         external
         payable
         returns (uint[] memory amounts);
@@ -93,23 +93,23 @@ interface IElkRouter {
     function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts);
     function getAmountsIn(uint amountOut, address[] calldata path) external view returns (uint[] memory amounts);
 
-    function removeLiquidityAVAXSupportingFeeOnTransferTokens(
+    function removeLiquidityETHSupportingFeeOnTransferTokens(
         address token,
         uint liquidity,
         uint amountTokenMin,
-        uint amountAVAXMin,
+        uint amountETHMin,
         address to,
         uint deadline
-    ) external returns (uint amountAVAX);
-    function removeLiquidityAVAXWithPermitSupportingFeeOnTransferTokens(
+    ) external returns (uint amountETH);
+    function removeLiquidityETHWithPermitSupportingFeeOnTransferTokens(
         address token,
         uint liquidity,
         uint amountTokenMin,
-        uint amountAVAXMin,
+        uint amountETHMin,
         address to,
         uint deadline,
         bool approveMax, uint8 v, bytes32 r, bytes32 s
-    ) external returns (uint amountAVAX);
+    ) external returns (uint amountETH);
 
     function swapExactTokensForTokensSupportingFeeOnTransferTokens(
         uint amountIn,
@@ -118,13 +118,13 @@ interface IElkRouter {
         address to,
         uint deadline
     ) external;
-    function swapExactAVAXForTokensSupportingFeeOnTransferTokens(
+    function swapExactETHForTokensSupportingFeeOnTransferTokens(
         uint amountOutMin,
         address[] calldata path,
         address to,
         uint deadline
     ) external payable;
-    function swapExactTokensForAVAXSupportingFeeOnTransferTokens(
+    function swapExactTokensForETHSupportingFeeOnTransferTokens(
         uint amountIn,
         uint amountOutMin,
         address[] calldata path,

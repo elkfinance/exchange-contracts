@@ -1,5 +1,5 @@
 {
-  "name": "@elkdex/avax-exchange-contracts",
+  "name": "@elkdex/eth-exchange-contracts",
   "publishConfig": {
     "access": "public"
   },
@@ -13,11 +13,11 @@
     "hardhat": "^2.0.6"
   },
   "version": "1.0.0",
-  "description": "Contracts for the Elk Dex on Avalanche.",
+  "description": "Contracts for the Elk Dex on MATIC.",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/elkfinance/avax-exchange-contracts.git"
+    "url": "https://github.com/elkfinance/eth-exchange-contracts.git"
   },
   "author": "Team Elk <hello@elk.finance>",
   "license": "MIT",
@@ -30,7 +30,7 @@
     "prepublishOnly": "yarn test"
   },
   "bugs": {
-    "url": "https://github.com/elkfinance/avax-exchange-contracts/issues"
+    "url": "https://github.com/elkfinance/eth-exchange-contracts/issues"
   },
   "homepage": "https://elk.finance"
 }
